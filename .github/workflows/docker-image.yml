@@ -1,0 +1,36 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: ["learn-24.03.20"]
+  pull_request:
+    branches: ["learn-24.03.20"]
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Login in Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io/lanzhiwang
+          password: ${{ secrets.GHCRIOTOKEN }}
+          username: ${{ github.repository_owner }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          file: ./ubuntu22.04/Dockerfile
+          context: ./ubuntu22.04
+          build-args: |
+            IMAGE_NAME=ghcr.io/lanzhiwang/cuda
+            DRIVER_VERSION=535.104.05
+            DRIVER_BRANCH=535
+            CUDA_VERSION=12.2.0
+            CVE_UPDATES=
+          push: true
+          tags: ghcr.io/lanzhiwang/nvidia/driver:535.104.05-ubuntu22.04
